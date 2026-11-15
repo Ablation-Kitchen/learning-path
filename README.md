@@ -2,6 +2,8 @@
 
 A locally run learning tracker. It loads a **Learning Path** (a YAML file of Blocks and Tasks, each Task on an explicit day) and turns it into a daily tracker: what to do today, what's overdue, Notes, and progress. There is one user, no login, and no automatic scheduling. You tick Tasks on the honour system, and the only thing that moves the schedule is a Schedule Shift you trigger yourself.
 
+Paths are plain YAML. Write one by hand, or have an AI agent write one for you with the [`learning-path` skill](#generate-paths-with-an-ai-agent-the-learning-path-skill) in this repo.
+
 It runs as one Docker container: Node + Fastify, React, and SQLite on a Docker volume.
 
 ![The Today screen: overdue Tasks in Catch up, today's Task done, the week strip, progress per Block and the Day Note](docs/screenshots/today-light.png)
@@ -45,7 +47,7 @@ Your data stays in the volume. When a new version changes the database layout, t
 
 ## Using it
 
-**1. Pick a path.** On first run, load a path from `app/paths/`, upload a YAML file, or restore a Backup. Choose the start date (Day 1); it defaults to the path's next start weekday (a Monday for the sample).
+**1. Pick a path.** On first run, load a path from `app/paths/`, upload a YAML file, or restore a Backup. Choose the start date (Day 1); it defaults to the path's next start weekday (a Monday for the sample). To make a path of your own, see [Authoring Learning Paths](#authoring-learning-paths).
 
 ![First run: pick a path, upload a file or restore a backup](docs/screenshots/first-run.png)
 
@@ -100,7 +102,7 @@ A `pre-restore-*.json` file can be restored through the app like any Backup.
 
 ## Authoring Learning Paths
 
-A path is a YAML file in `app/paths/` (mounted read-only at `/paths`), or an upload. It must validate against the JSON Schema in [`app/core/schema/learning-path.schema.json`](app/core/schema/learning-path.schema.json). Use [`app/paths/eval-infra-17-weeks.yaml`](app/paths/eval-infra-17-weeks.yaml) as a worked example. The app lists every file it finds there with its validation status, and shows each problem with its line number.
+A path is a YAML file in `app/paths/` (mounted read-only at `/paths`), or an upload. Write it by hand using the rules below, or let an agent write it with the [`learning-path` skill](#generate-paths-with-an-ai-agent-the-learning-path-skill). It must validate against the JSON Schema in [`app/core/schema/learning-path.schema.json`](app/core/schema/learning-path.schema.json). Use [`app/paths/eval-infra-17-weeks.yaml`](app/paths/eval-infra-17-weeks.yaml) as a worked example. The app lists every file it finds there with its validation status, and shows each problem with its line number.
 
 - Task `id`s are what progress and Notes hang on. Keep them stable when you edit a path.
 - Editing a file that an Enrollment came from shows a **"The path file has changed — review reload"** banner. Nothing reloads by itself; the preview lists added, removed, moved and changed Tasks before you apply it. Removed Tasks that have progress or a Note are kept hidden, not deleted, and come back if you restore them to the file.
@@ -108,14 +110,19 @@ A path is a YAML file in `app/paths/` (mounted read-only at `/paths`), or an upl
 
 ### Generate paths with an AI agent: the `learning-path` skill
 
-[`plugins/learning-tracker/skills/learning-path/`](plugins/learning-tracker/skills/learning-path/) is an [Agent Skill](https://code.claude.com/docs/en/skills) that writes paths for you. Describe what you want to learn, how many weeks you have and when you study, and the agent:
+[`plugins/learning-tracker/skills/learning-path/`](plugins/learning-tracker/skills/learning-path/) is an [Agent Skill](https://code.claude.com/docs/en/skills) that writes paths for you. Ask for one in plain words, for example:
 
-1. agrees an outline of Blocks and weekly topics with you,
-2. picks resources and keeps only links it has opened and confirmed,
-3. places every Task on a day following your weekly rhythm, and
-4. checks the file with `scripts/validate.mjs`, which is the app's own loader bundled into one file. A path it calls VALID loads in the app. Besides problems, it prints a week-by-week pacing table.
+> Make me a 6-week learning path for Rust. I'm a Python developer. I want to build a small CLI tool by the end. I study weekdays, 45 minutes a session, plus a Saturday review.
 
-It can also convert an existing plan or syllabus, or extend a path you already use without breaking your progress. The checker needs Node 18 or later; nothing else.
+The agent then:
+
+1. **Briefs:** confirms your goal, starting point, number of weeks and weekly schedule, and proposes defaults for anything you leave open.
+2. **Outlines:** agrees the Blocks (2–4 weeks each, each with a goal) and the topic of every week with you.
+3. **Picks resources:** keeps only links it has opened and confirmed; anything it can't confirm stays as a title without a link.
+4. **Places every Task on a day:** follows your weekly schedule and sizes each Task to your session length. It leaves about one free session a week so you can catch up.
+5. **Checks the file:** runs `scripts/validate.mjs`, the app's own loader bundled into one file, until it reports VALID. A path it calls VALID loads in the app. The check also prints the Blocks and a table of the Tasks starting each week, so you can see the pacing at a glance.
+
+It can also convert an existing plan or syllabus into a path, or extend a path you already use: Task ids stay unchanged, so your progress and Notes survive the reload. The skill is a `SKILL.md` plus two references (the file format, and how to place Tasks on days). The checker needs Node 18 or later and nothing else.
 
 **Claude Code** (as a plugin):
 
@@ -135,7 +142,13 @@ curl -L https://github.com/Ablation-Kitchen/persistance-of-progress/archive/refs
     persistance-of-progress-main/plugins/learning-tracker/skills/learning-path
 ```
 
-To check a path by hand: `node plugins/learning-tracker/skills/learning-path/scripts/validate.mjs my-path.yaml`.
+To check any path file yourself, from a clone of this repo:
+
+```sh
+node plugins/learning-tracker/skills/learning-path/scripts/validate.mjs my-path.yaml
+```
+
+It exits with 0 when the file is valid, and lists each problem with its line and column when it isn't.
 
 ## Repository layout
 
