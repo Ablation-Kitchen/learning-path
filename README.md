@@ -127,19 +127,19 @@ It can also convert an existing plan or syllabus into a path, or extend a path y
 **Claude Code** (as a plugin):
 
 ```
-/plugin marketplace add Ablation-Kitchen/persistance-of-progress
-/plugin install learning-tracker@persistance-of-progress
+/plugin marketplace add Ablation-Kitchen/learning-path
+/plugin install learning-tracker@learning-path
 ```
 
-On Claude Code 2.1.275 or later, one step does both: `/plugin install learning-tracker --marketplace Ablation-Kitchen/persistance-of-progress`. Then ask for a learning path, or run `/learning-tracker:learning-path`.
+On Claude Code 2.1.275 or later, one step does both: `/plugin install learning-tracker --marketplace Ablation-Kitchen/learning-path`. Then ask for a learning path, or run `/learning-tracker:learning-path`.
 
 **Any other agent that supports skills** (or Claude Code without plugins): copy the skill folder into the agent's skills folder. For Claude Code that's `~/.claude/skills/` for every project or `.claude/skills/` for one:
 
 ```sh
 mkdir -p ~/.claude/skills
-curl -L https://github.com/Ablation-Kitchen/persistance-of-progress/archive/refs/heads/main.tar.gz \
+curl -L https://github.com/Ablation-Kitchen/learning-path/archive/refs/heads/main.tar.gz \
   | tar -xz -C ~/.claude/skills --strip-components=4 \
-    persistance-of-progress-main/plugins/learning-tracker/skills/learning-path
+    learning-path-main/plugins/learning-tracker/skills/learning-path
 ```
 
 To check any path file yourself, from a clone of this repo:
