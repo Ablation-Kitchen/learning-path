@@ -1,5 +1,5 @@
 {
-  "name": "learning-tracker",
+  "name": "learning-path",
   "description": "Author Learning Path YAML files for the Learning Tracker app, checked by the app's own validator.",
   "version": "1.0.0",
   "author": {

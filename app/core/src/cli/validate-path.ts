@@ -1,5 +1,5 @@
 /**
- * The Learning Path check shipped inside the `learning-path` skill (plugins/learning-tracker/skills/learning-path/).
+ * The Learning Path check shipped inside the `learning-path` skill (plugins/learning-path/skills/learning-path/).
  * It runs the app's own loading pipeline (`loadPath`), so a file it accepts is a file the app
  * accepts, and adds a per-week pacing table for the author to review.
  *

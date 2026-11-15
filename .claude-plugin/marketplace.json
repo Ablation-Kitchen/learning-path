@@ -6,8 +6,8 @@
   },
   "plugins": [
     {
-      "name": "learning-tracker",
-      "source": "./plugins/learning-tracker",
+      "name": "learning-path",
+      "source": "./plugins/learning-path",
       "description": "Author Learning Path YAML files for the Learning Tracker app, checked by the app's own validator."
     }
   ]
