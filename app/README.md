@@ -21,6 +21,8 @@ npm run build -w core   # web and server import core from dist: rebuild it after
 npm run typecheck && npm run lint && npm run format:check && npm test
 ```
 
+The `learning-path` skill ships the path loader as one bundled file. After changing the schema or `core/src/path/`, rebuild it with `npm run build:skill-validator -w core`; a core test fails until you do.
+
 ## End-to-end
 
 ```sh

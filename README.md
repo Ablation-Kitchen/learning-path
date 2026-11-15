@@ -106,11 +106,43 @@ A path is a YAML file in `app/paths/` (mounted read-only at `/paths`), or an upl
 - Editing a file that an Enrollment came from shows a **"The path file has changed — review reload"** banner. Nothing reloads by itself; the preview lists added, removed, moved and changed Tasks before you apply it. Removed Tasks that have progress or a Note are kept hidden, not deleted, and come back if you restore them to the file.
 - [`app/core/schema/generated/learning-path.generation.schema.json`](app/core/schema/generated/learning-path.generation.schema.json) is a derived version of the schema for LLM structured output (generating paths with a model). Rebuild it with `npm run build:generation-schema -w core` in `app/`.
 
+### Generate paths with an AI agent: the `learning-path` skill
+
+[`plugins/learning-tracker/skills/learning-path/`](plugins/learning-tracker/skills/learning-path/) is an [Agent Skill](https://code.claude.com/docs/en/skills) that writes paths for you. Describe what you want to learn, how many weeks you have and when you study, and the agent:
+
+1. agrees an outline of Blocks and weekly topics with you,
+2. picks resources and keeps only links it has opened and confirmed,
+3. places every Task on a day following your weekly rhythm, and
+4. checks the file with `scripts/validate.mjs`, which is the app's own loader bundled into one file. A path it calls VALID loads in the app. Besides problems, it prints a week-by-week pacing table.
+
+It can also convert an existing plan or syllabus, or extend a path you already use without breaking your progress. The checker needs Node 18 or later; nothing else.
+
+**Claude Code** (as a plugin):
+
+```
+/plugin marketplace add Ablation-Kitchen/persistance-of-progress
+/plugin install learning-tracker@persistance-of-progress
+```
+
+On Claude Code 2.1.275 or later, one step does both: `/plugin install learning-tracker --marketplace Ablation-Kitchen/persistance-of-progress`. Then ask for a learning path, or run `/learning-tracker:learning-path`.
+
+**Any other agent that supports skills** (or Claude Code without plugins): copy the skill folder into the agent's skills folder. For Claude Code that's `~/.claude/skills/` for every project or `.claude/skills/` for one:
+
+```sh
+mkdir -p ~/.claude/skills
+curl -L https://github.com/Ablation-Kitchen/persistance-of-progress/archive/refs/heads/main.tar.gz \
+  | tar -xz -C ~/.claude/skills --strip-components=4 \
+    persistance-of-progress-main/plugins/learning-tracker/skills/learning-path
+```
+
+To check a path by hand: `node plugins/learning-tracker/skills/learning-path/scripts/validate.mjs my-path.yaml`.
+
 ## Repository layout
 
 | Path | What's there |
 |---|---|
 | [`app/`](app/) | The application: npm workspaces `core` (pure TypeScript: schema, loader, derived signals, reload diff, export, API contracts), `server` (Fastify, SQLite, migrations), `web` (React + Vite), plus `paths/`, the Dockerfile and `compose.yaml`. See [`app/README.md`](app/README.md) for development. |
+| [`plugins/learning-tracker/`](plugins/learning-tracker/) | The `learning-path` Agent Skill, packaged as a Claude Code plugin; [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) lists it. |
 | [`spec/SPEC.md`](spec/SPEC.md) | The build spec, and [`spec/build-tickets/`](spec/build-tickets/README.md), the 16 tickets it was built from. |
 | [`docs/screenshots/`](docs/screenshots/) | The screenshots in this README. |
 | [`GLOSSARY.md`](GLOSSARY.md) | The domain terms (Learning Path, Enrollment, Task, Block, Schedule Shift…). Code and UI use them. |

@@ -1,0 +1,14 @@
+{
+  "name": "persistance-of-progress",
+  "description": "Agent Skills for the Learning Tracker app.",
+  "owner": {
+    "name": "Ablation Kitchen"
+  },
+  "plugins": [
+    {
+      "name": "learning-tracker",
+      "source": "./plugins/learning-tracker",
+      "description": "Author Learning Path YAML files for the Learning Tracker app, checked by the app's own validator."
+    }
+  ]
+}
