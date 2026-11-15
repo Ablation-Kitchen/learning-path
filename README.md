@@ -4,6 +4,8 @@ A locally run learning tracker. It loads a **Learning Path** (a YAML file of Blo
 
 It runs as one Docker container: Node + Fastify, React, and SQLite on a Docker volume.
 
+![The Today screen: overdue Tasks in Catch up, today's Task done, the week strip, progress per Block and the Day Note](docs/screenshots/today-light.png)
+
 ## Run it
 
 You need Docker with Compose v2.
@@ -40,6 +42,33 @@ git pull && docker compose up --build
 ```
 
 Your data stays in the volume. When a new version changes the database layout, the server first writes a Safety Copy (see below) and then migrates.
+
+## Using it
+
+**1. Pick a path.** On first run, load a path from `app/paths/`, upload a YAML file, or restore a Backup. Choose the start date (Day 1); it defaults to the path's next start weekday (a Monday for the sample).
+
+![First run: pick a path, upload a file or restore a backup](docs/screenshots/first-run.png)
+
+**2. Work from Today.** Today is the daily view:
+
+- **Today** holds the Tasks scheduled for today, **In progress** holds multi-day Tasks still open, and **Catch up** lists overdue Tasks, oldest first.
+- Tick the circle when a Task is done. Use **skip** for a Task you won't do and **more** for its description and links. Click a day in the week strip to look at it or tick its Tasks early.
+- Click a Task title to open its Task Note in the side pane. The **Day Note** sits below it. Both save as you type, and support Markdown with a Write/Preview toggle.
+- **Fallen behind?** In Catch up, **shift open tasks by N days** moves every open Task later, all at once. It's the only thing that ever changes the schedule, and **Undo** reverses it.
+
+**3. See the whole run on Path.** Every Block, week and Task with its status, progress per Block and checkpoints. Filter by open, overdue, optional or done. The **Resources** panel lists every link in the path and which Tasks use it.
+
+![The Path screen: Blocks and weeks with Task status, and the Resources index](docs/screenshots/path.png)
+
+**4. Read back on Notes.** Every Note, grouped by Block, with search. Day Notes run down the right. **Export .md** downloads them all as one Markdown file, organised by Block → week → day.
+
+![The Notes screen: Task Notes by Block, Day Notes alongside](docs/screenshots/notes.png)
+
+**5. Keep a Backup.** In the app menu (the path title, top right), **Download backup** saves everything to a JSON file. The same menu restores a backup, switches between Enrollments and starts a new one.
+
+The sun/moon button switches between light and dark themes; by default the app follows your system.
+
+![The Today screen in the dark theme](docs/screenshots/today-dark.png)
 
 ## Your data
 
@@ -83,6 +112,7 @@ A path is a YAML file in `app/paths/` (mounted read-only at `/paths`), or an upl
 |---|---|
 | [`app/`](app/) | The application: npm workspaces `core` (pure TypeScript: schema, loader, derived signals, reload diff, export, API contracts), `server` (Fastify, SQLite, migrations), `web` (React + Vite), plus `paths/`, the Dockerfile and `compose.yaml`. See [`app/README.md`](app/README.md) for development. |
 | [`spec/SPEC.md`](spec/SPEC.md) | The build spec, and [`spec/build-tickets/`](spec/build-tickets/README.md), the 16 tickets it was built from. |
+| [`docs/screenshots/`](docs/screenshots/) | The screenshots in this README. |
 | [`GLOSSARY.md`](GLOSSARY.md) | The domain terms (Learning Path, Enrollment, Task, Block, Schedule Shift…). Code and UI use them. |
 | [`.wayfinder/issues/`](.wayfinder/issues/) | The design decisions behind the spec, with the alternatives that weren't chosen. |
 | [`prototypes/`](prototypes/) | The throwaway HTML prototypes of the Today, Path and Notes screens. |
